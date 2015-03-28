@@ -1,5 +1,3 @@
-# http://std.stheadline.com/breakingnews/20150327a144036.asp
-
 from operator import concat
 from baseparser import BaseParser
 from baseparser import grab_url

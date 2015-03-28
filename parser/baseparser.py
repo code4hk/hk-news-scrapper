@@ -1,10 +1,14 @@
 from operator import concat
 from bs4 import BeautifulSoup
+from util import logger
 import urllib.request
 import http.cookiejar
 import socket
 import time
 import re
+
+
+log = logger.get(__name__)
 
 
 def grab_url(url, max_retry=5, opener=None):
@@ -22,6 +26,7 @@ def grab_url(url, max_retry=5, opener=None):
             raise Exception('Too many attempts to download %s' % url)
         time.sleep(0.5)
         return grab_url(url, max_retry - 1, opener)
+    log.debug('Retrieved %s', url)
     return text
 
 
@@ -33,7 +38,7 @@ class BaseParser(object):
     date = None
     title = None
     body = None
-    encoding = 'big5'
+    encoding = 'big5hkscs'
 
     real_article = True  # If set to False, ignore this article
 
