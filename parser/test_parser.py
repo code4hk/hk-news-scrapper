@@ -24,3 +24,6 @@ parser = getattr(__import__(module, globals(), fromlist=[class_name]), class_nam
 if url:
     parsed_article = parser(url)
     print(str(parsed_article))
+else:
+    links = parser.feed_urls()
+    print('\n'.join(links))
