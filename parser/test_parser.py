@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 Test a parser.  For example:
 $ python parser/test_parser.py singtao.STParser http://std.stheadline.com/breakingnews/20150327a144036.asp

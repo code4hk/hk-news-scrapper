@@ -2,6 +2,7 @@ from operator import concat
 from bs4 import BeautifulSoup
 from util import logger
 import urllib.request
+import urllib.error
 import http.cookiejar
 import socket
 import time
@@ -19,7 +20,7 @@ def grab_url(url, max_retry=5, opener=None):
     retry = False
     try:
         text = opener.open(url, timeout=5).read()
-    except socket.timeout:
+    except (socket.timeout, urllib.error.URLError):
         retry = True
     if retry:
         if max_retry == 0:
@@ -31,6 +32,7 @@ def grab_url(url, max_retry=5, opener=None):
 
 
 class BaseParser(object):
+    domains = []
     # These should be filled in by self._parse(html)
     page_prefix = ''
     feeder_pattern = ''
