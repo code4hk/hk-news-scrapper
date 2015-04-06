@@ -1,4 +1,4 @@
-from parser.baseparser import BaseParser
+from parsers.baseparser import BaseParser
 import re
 
 

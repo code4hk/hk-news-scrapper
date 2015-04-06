@@ -1,6 +1,6 @@
 from model.models import Articles
-from parser import get_parser
-from parser import parsers
+from parsers import get_parser
+from parsers import parsers
 from util import logger
 import urllib.request
 import traceback
