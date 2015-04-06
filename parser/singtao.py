@@ -1,6 +1,6 @@
 from operator import concat
-from baseparser import BaseParser
-from baseparser import grab_url
+from parser.baseparser import BaseParser
+from parser.baseparser import grab_url
 import re
 
 

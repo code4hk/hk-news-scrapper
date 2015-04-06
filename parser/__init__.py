@@ -1,5 +1,8 @@
+import importlib
+
 parsers = """
 singtao.STParser
+apple.AppleParser
 """.split()
 
 parser_dict = {}
@@ -7,7 +10,7 @@ parser_dict = {}
 # Import the parser and fill in parser_dict: domain -> parser
 for parser_name in parsers:
     module, class_name = parser_name.rsplit('.', 1)
-    parser = getattr(__import__(module, globals(), fromlist=[class_name]), class_name)
+    parser = getattr(importlib.import_module('parser.' + module), class_name)
     for domain in parser.domains:
         parser_dict[domain] = parser
 
