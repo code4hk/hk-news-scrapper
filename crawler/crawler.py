@@ -23,7 +23,7 @@ def get_all_new_article_urls():
 
 
 def get_existing_urls(articles):
-    return articles.get_all_urls()
+    return articles.get_all_urls_older_than(20)
 
 
 def get_all_article_urls(articles):

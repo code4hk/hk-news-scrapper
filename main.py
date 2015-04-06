@@ -1,3 +1,4 @@
 if __name__ == '__main__':
     from crawler import crawler
-    crawler.main()
+    while True:
+        crawler.main()
