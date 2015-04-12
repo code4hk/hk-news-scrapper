@@ -3,6 +3,7 @@ import importlib
 parsers = """
 singtao.STParser
 apple.AppleParser
+tvb.TVBParser
 """.split()
 
 parser_dict = {}
