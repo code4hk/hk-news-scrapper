@@ -24,10 +24,14 @@ class TVBParser(BaseParser):
         if elt is None:
             self.real_article = False
             return
-        # print (elt)
-        self.title = elt.find('h4').contents[0]
+
+        title = elt.find('h4')
+        if title is None:
+            self.real_article = False
+            return
+
+        self.title = title.contents[0]
         self.date = elt.find('span', 'time').getText()
-        print('The title is: %s' % self.title)
 
         div = soup.find('div', id='c1_afterplayer').pre
         if div is None:
@@ -35,7 +39,6 @@ class TVBParser(BaseParser):
             return
 
         self.body = '\n'.join(re.compile('\n+').split(div.getText().strip()))
-        print('The body is: %s' % self.body)
 
     @classmethod
     def _get_all_page(cls, url):
