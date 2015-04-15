@@ -1,10 +1,9 @@
-from operator import concat
 from parsers.baseparser import BaseParser
-from parsers.baseparser import grab_url
 import re
 
 
 class TVBParser(BaseParser):
+    key = 'tvb'
     domains = ['news.tvb.com']
     page_prefix = 'http://news.tvb.com/'
     feeder_pattern = '^http://news.tvb.com/'
@@ -28,7 +27,7 @@ class TVBParser(BaseParser):
         # print (elt)
         self.title = elt.find('h4').contents[0]
         self.date = elt.find('span', 'time').getText()
-        print ('The title is: %s' % self.title)
+        print('The title is: %s' % self.title)
 
         div = soup.find('div', id='c1_afterplayer').pre
         if div is None:
@@ -36,7 +35,7 @@ class TVBParser(BaseParser):
             return
 
         self.body = '\n'.join(re.compile('\n+').split(div.getText().strip()))
-        print ('The body is: %s' % self.body)
+        print('The body is: %s' % self.body)
 
     @classmethod
     def _get_all_page(cls, url):

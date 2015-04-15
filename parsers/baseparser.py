@@ -32,6 +32,7 @@ def grab_url(url, max_retry=5, opener=None):
 
 
 class BaseParser(object):
+    key = None
     domains = []
     # These should be filled in by self._parse(html)
     page_prefix = ''

@@ -5,6 +5,7 @@ import re
 
 
 class STParser(BaseParser):
+    key = 'singtao'
     domains = ['std.stheadline.com']
     page_prefix = 'http://std.stheadline.com/breakingnews/'
     feeder_pattern = '^http://std.stheadline.com/breakingnews/'
