@@ -59,7 +59,7 @@ def update_articles():
         parsed_article = load_article(url)
         if parsed_article is None:
             continue
-        articles.save_revision(url, parsed_article.date, parsed_article.title, parsed_article.body)
+        articles.save_revision(parsed_article.code, url, parsed_article.date, parsed_article.title, parsed_article.body)
 
 
 def main():

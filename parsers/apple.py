@@ -3,7 +3,8 @@ import re
 
 
 class AppleParser(BaseParser):
-    key = 'apple'
+    code = 'apple'
+    name = u'蘋果日報'
     domains = ['hk.apple.nextmedia.com']
     feeder_pattern = '^http://hk.apple.nextmedia.com/realtime/[a-z]+/[0-9]+/[0-9]+'
     feeder_pages = [

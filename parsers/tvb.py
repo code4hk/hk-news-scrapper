@@ -3,7 +3,8 @@ import re
 
 
 class TVBParser(BaseParser):
-    key = 'tvb'
+    code = 'tvb'
+    name = u'無綫新聞'
     domains = ['news.tvb.com']
     page_prefix = 'http://news.tvb.com/'
     feeder_pattern = '^http://news.tvb.com/'

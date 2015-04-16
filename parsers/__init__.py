@@ -1,3 +1,4 @@
+from model.models import Publishers
 import importlib
 
 parsers = """
@@ -7,11 +8,13 @@ tvb.TVBParser
 """.split()
 
 parser_dict = {}
+publishers = Publishers()
 
 # Import the parser and fill in parser_dict: domain -> parser
 for parser_name in parsers:
     module, class_name = parser_name.rsplit('.', 1)
     parser = getattr(importlib.import_module('parsers.' + module), class_name)
+    publishers.create_publisher_if_not_exists(parser.code, parser.name)
     for domain in parser.domains:
         parser_dict[domain] = parser
 
