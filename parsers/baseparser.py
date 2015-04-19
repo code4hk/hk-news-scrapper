@@ -22,6 +22,9 @@ def grab_url(url, max_retry=5, opener=None):
         text = opener.open(url, timeout=5).read()
     except (socket.timeout, urllib.error.URLError):
         retry = True
+    except ConnectionResetError:
+        retry = False
+        log.error('oops, blocked! %s', url)
     if retry:
         if max_retry == 0:
             raise Exception('Too many attempts to download %s' % url)
@@ -42,7 +45,7 @@ class BaseParser(object):
     date = None
     title = None
     body = None
-    encoding = 'big5hkscs'
+    encoding = 'utf-8'
 
     real_article = True  # If set to False, ignore this article
 

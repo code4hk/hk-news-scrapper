@@ -10,6 +10,7 @@ class STParser(BaseParser):
     domains = ['std.stheadline.com']
     page_prefix = 'http://std.stheadline.com/breakingnews/'
     feeder_pattern = '^http://std.stheadline.com/breakingnews/'
+    encoding = 'big5hkscs'
     feeder_pages = [
         'http://std.stheadline.com/breakingnews/instantnews_locfrontpage.html',
         'http://std.stheadline.com/breakingnews/instantnews_intfrontpage.html',
