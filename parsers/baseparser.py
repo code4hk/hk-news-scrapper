@@ -45,6 +45,7 @@ class BaseParser(object):
     date = None
     title = None
     body = None
+    lang = 'zh_Hant'
     encoding = 'utf-8'
 
     real_article = True  # If set to False, ignore this article

@@ -55,16 +55,22 @@ def update_articles():
     all_urls = get_all_article_urls(articles)
     log.info('Got all %s urls; storing to database' % len(all_urls))
     for i, url in enumerate(all_urls):
-        log.debug('Woo: %d/%d is %s' % (i+1, len(all_urls), url))
+        log.debug('Woo: %d/%d is %s' % (i + 1, len(all_urls), url))
         parsed_article = load_article(url)
         if parsed_article is None:
             continue
-        articles.save_revision(parsed_article.code, url, parsed_article.date, parsed_article.title, parsed_article.body)
+        articles.save_entry(parsed_article.code,
+                            url,
+                            parsed_article.date,
+                            parsed_article.title,
+                            parsed_article.body,
+                            parsed_article.lang)
 
 
 def main():
     update_articles()
     pass
+
 
 if __name__ == '__main__':
     main()
