@@ -59,12 +59,7 @@ def update_articles():
         parsed_article = load_article(url)
         if parsed_article is None:
             continue
-        articles.save_entry(parsed_article.code,
-                            url,
-                            parsed_article.date,
-                            parsed_article.title,
-                            parsed_article.body,
-                            parsed_article.lang)
+        articles.save_entry(parsed_article, url)
 
 
 def main():

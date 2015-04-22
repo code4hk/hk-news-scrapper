@@ -1,4 +1,4 @@
-from model.models import Publishers
+from model.publisher import Publishers
 import importlib
 
 parsers = """
