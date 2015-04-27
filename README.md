@@ -1,9 +1,7 @@
-NewsdiffHK
+hk-news-scrapper
 ==========
 
-This is the backend of Newsdiff HK.  The frontend lives [here](https://github.com/code4hk/Newsdiff-Frontend).
-
-Inspired by and modified from similar projects in [Taiwan](https://github.com/ronnywang/newsdiff) and [US](https://github.com/ecprice/newsdiffs).
+A scrapper of Hong Kong news.  It is a spin-off from [the backend of NewsDiff HK](https://github.com/code4hk/Newsdiff-Backend).
 
 Dev Environment Setup
 ---------------------
@@ -25,10 +23,6 @@ To run the scraper:
 To track the log:
 
 	$ tail news_diff.log -f
-
-To start API handling:
-
-	$ gunicorn api:app
 
 To deactivate the virtual environment after use:
 

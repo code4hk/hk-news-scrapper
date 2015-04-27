@@ -1,6 +1,4 @@
 from difflib import SequenceMatcher
-from bson.objectid import ObjectId
-from bson.json_util import dumps
 from model.content import Content
 from pymongo import MongoClient
 from datetime import timedelta
@@ -87,22 +85,7 @@ class Articles(object):
     def update_last_check_time(self, nid):
         self.news.update_one({"_id": nid}, {'$set': {"last_check": datetime.utcnow()}})
 
-    def load_modified_news(self, params):
-        cursor = params.get_from(self.news)
-        return dumps({'news': (list(cursor)), 'meta': (params.get_meta(cursor))})
-
     def get_all_urls_older_than(self, interval):
         log.info('getting urls older than %s minutes', interval)
         older_than = datetime.utcnow() - timedelta(seconds=interval * 60)
         return self.news.find({"last_check": {"$lt": older_than}}).distinct('url')
-
-    def load_article_history(self, news_id):
-        news = self.news.find({'_id': ObjectId(news_id)})[0]
-        revisions = list(self.revisions.find({'nid': news_id}, projection={'_id': 0, 'nid': 0}))
-        prev = None
-        for item in revisions:
-            body = item['body']
-            item['content'] = diff_string(prev, body)
-            prev = body
-        news['revisions'] = revisions
-        return dumps(news)
