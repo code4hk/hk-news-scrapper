@@ -1,4 +1,3 @@
-from difflib import SequenceMatcher
 from model.content import Content
 from pymongo import MongoClient
 from datetime import timedelta
@@ -8,23 +7,6 @@ from util import logger
 
 
 log = logger.get(__name__)
-
-
-def diff_string(original, revision):
-    if not original or not revision:
-        return None
-    parts = []
-    for tag, i1, i2, j1, j2 in SequenceMatcher(None, original, revision, False).get_opcodes():
-        if tag == 'replace':
-            parts.append(''.join(['<o>', original[i1:i2], '</o>']))
-            parts.append(''.join(['<c>', revision[j1:j2], '</c>']))
-        elif tag == 'insert':
-            parts.append(''.join(['<c>', revision[j1:j2], '</c>']))
-        elif tag == 'delete':
-            parts.append(''.join(['<o>', original[i1:i2], '</o>']))
-        elif tag == 'equal':
-            parts.append(original[i1:i2])
-    return ''.join(parts)
 
 
 class Articles(object):
