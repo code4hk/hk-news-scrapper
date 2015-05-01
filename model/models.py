@@ -67,7 +67,6 @@ class Articles(object):
     def update_last_check_time(self, nid):
         self.news.update_one({"_id": nid}, {'$set': {"last_check": datetime.utcnow()}})
 
-    def get_all_urls_older_than(self, interval):
-        log.info('getting urls older than %s minutes', interval)
-        older_than = datetime.utcnow() - timedelta(seconds=interval * 60)
-        return self.news.find({"last_check": {"$lt": older_than}}).distinct('url')
+    def get_all_active_urls(self, days):
+        log.info('getting urls changed within %s days', days)
+        return self.news.find({'$where': 'this.updated_at > this.last_check-' + str(days * 86400000)}).distinct('url')
