@@ -6,7 +6,7 @@ import re
 
 class STParser(BaseParser):
     code = 'singtao'
-    name = u'星島日聞'
+    name = u'星島日報'
     domains = ['std.stheadline.com']
     page_prefix = 'http://std.stheadline.com/breakingnews/'
     feeder_pattern = '^http://std.stheadline.com/breakingnews/'
