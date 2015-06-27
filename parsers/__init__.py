@@ -15,8 +15,7 @@ for parser_name in parsers:
     module, class_name = parser_name.rsplit('.', 1)
     parser = getattr(importlib.import_module('parsers.' + module), class_name)
     publishers.create_publisher_if_not_exists(parser.code, parser.name)
-    for domain in parser.domains:
-        parser_dict[domain] = parser
+    parser_dict[parser.domain] = parser
 
 
 def get_parser(url):

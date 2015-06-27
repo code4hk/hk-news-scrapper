@@ -1,13 +1,18 @@
 from operator import concat
-from parsers.baseparser import BaseParser
-from parsers.baseparser import grab_url
+from .baseparser import BaseParser
+from .baseparser import grab_url
+from util import logger
+import asyncio
 import re
+
+
+log = logger.get(__name__)
 
 
 class STParser(BaseParser):
     code = 'singtao'
     name = u'星島日報'
-    domains = ['std.stheadline.com']
+    domain = 'std.stheadline.com'
     page_prefix = 'http://std.stheadline.com/breakingnews/'
     feeder_pattern = '^http://std.stheadline.com/breakingnews/'
     encoding = 'big5hkscs'
@@ -37,8 +42,14 @@ class STParser(BaseParser):
         self.body = '\n'.join(re.compile('\n+').split(div.getText().strip()))
 
     @classmethod
+    @asyncio.coroutine
     def _get_all_page(cls, url):
-        soup = cls.soup(grab_url(url))
+        try:
+            page = yield from grab_url(url)
+            soup = cls.soup(page)
+        except RuntimeError:
+            log.error("Cannot get all pages for {}, defaulting to the first page".format(url))
+            return [url]
         urls = [url]
         urls += [concat(cls.page_prefix, link.get('href')) for link in soup.find_all('a', 'papernewstop')[:-1]]
         return urls

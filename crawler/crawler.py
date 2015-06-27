@@ -2,8 +2,7 @@ from model.models import Articles
 from parsers import get_parser
 from parsers import parsers
 from util import logger
-import urllib.request
-import traceback
+import asyncio
 
 log = logger.get(__name__)
 
@@ -12,59 +11,35 @@ def canonicalize_url(url):
     return url.split('?')[0].split('#')[0].strip()
 
 
-def get_all_new_article_urls():
-    ans = set()
-    for parser in parsers:
-        log.info('Looking up %s' % parser.domains)
-        urls = parser.feed_urls()
-        ans = ans.union(map(canonicalize_url, urls))
-        log.debug('Got %s urls so far' % len(ans))
-    return ans
-
-
 def get_existing_urls(articles):
     return articles.get_all_active_urls(5)
 
 
-def get_all_article_urls(articles):
-    return get_all_new_article_urls().union(get_existing_urls(articles))
-
-
-def load_article(url):
-    try:
-        parser = get_parser(url)
-    except KeyError:
-        log.info('Unable to parse domain, skipping')
-        return
-    try:
-        parsed_article = parser(url)
-    except (AttributeError, urllib.request.HTTPError, Exception) as e:
-        if isinstance(e, urllib.request.HTTPError) and e.msg == 'Gone':
-            return
-        log.error('Exception when parsing %s', url)
-        log.error(traceback.format_exc())
-        log.error('Continuing')
-        return
-    if not parsed_article.real_article:
-        return
-    return parsed_article
-
-
-def update_articles():
+@asyncio.coroutine
+def crawl_all():
     articles = Articles()
-    all_urls = get_all_article_urls(articles)
-    log.info('Got all %s urls; storing to database' % len(all_urls))
-    for i, url in enumerate(all_urls):
-        log.debug('Woo: %d/%d is %s' % (i + 1, len(all_urls), url))
-        parsed_article = load_article(url)
-        if parsed_article is None:
+    visited = set()
+    coroutines = [parser.feed_urls() for parser in parsers]
+    for coroutine in asyncio.as_completed(coroutines):
+        urls = list(map(canonicalize_url, (yield from coroutine)))
+        if len(urls) < 1:
             continue
-        articles.save_entry(parsed_article, url)
+        parser = get_parser(urls[0])
+        log.info('Got {} URLs for {}'.format(len(urls), parser.domain))
+        to_get = [parser(x).parse() for x in urls if x not in visited]
+        visited = visited.union(urls)
+        for get_page in asyncio.as_completed(to_get):
+            try:
+                page = yield from get_page
+                articles.save_entry(page)
+            except Exception as e:
+                log.error(e)
 
 
 def main():
-    update_articles()
-    pass
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(crawl_all())
+    loop.close()
 
 
 if __name__ == '__main__':

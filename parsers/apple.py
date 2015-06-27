@@ -1,11 +1,12 @@
-from parsers.baseparser import BaseParser
+from .baseparser import BaseParser
+import asyncio
 import re
 
 
 class AppleParser(BaseParser):
     code = 'apple'
     name = u'蘋果日報'
-    domains = ['hk.apple.nextmedia.com']
+    domain = 'hk.apple.nextmedia.com'
     feeder_pattern = '^http://hk.apple.nextmedia.com/realtime/[a-z]+/[0-9]+/[0-9]+'
     feeder_pages = [
         'http://hk.apple.nextmedia.com/realtime/realtimelist/top',
@@ -32,5 +33,6 @@ class AppleParser(BaseParser):
         self.date = date_elt.getText()
 
     @classmethod
+    @asyncio.coroutine
     def _get_all_page(cls, url):
         return [url]

@@ -1,6 +1,5 @@
 from model.content import Content
 from pymongo import MongoClient
-from datetime import timedelta
 from datetime import datetime
 from util.env import db_url
 from util import logger
@@ -15,23 +14,23 @@ class Articles(object):
         self.news = client.newsdiff.news
         self.revisions = client.newsdiff.revisions
 
-    def save_entry(self, article, url):
+    def save_entry(self, article):
         content = Content.from_article(article)
-        news_cursor = self.news.find({"url": url})
+        news_cursor = self.news.find({"url": article.url})
         if news_cursor.count() == 0:
-            log.info('new entry: %s', url)
-            self.new_entry(article.code, url, article.lang, content)
+            log.info('new entry: %s', article.url)
+            self.new_entry(article.code, article.url, article.lang, content)
         else:
             nid = news_cursor[0]['_id']
             revision_cursor = self.revisions.find({'nid': str(nid)})
             first_version = revision_cursor[0]
             last_revision = revision_cursor[revision_cursor.count() - 1]
             if content.change_ratio(last_revision) > 0:
-                log.info('new entry version: %s', url)
+                log.info('new entry version: %s', article.url)
                 self.update_news_entry(nid, content.title, content.change_ratio(first_version))
                 self.new_revision(nid, revision_cursor.count(), content)
             else:
-                log.debug('entry not modified: %s', url)
+                log.debug('entry not modified: %s', article.url)
                 self.update_last_check_time(nid)
 
     def new_entry(self, publisher, url, lang, content):

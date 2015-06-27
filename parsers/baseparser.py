@@ -1,35 +1,31 @@
-from operator import concat
 from bs4 import BeautifulSoup
 from util import logger
-import urllib.request
-import urllib.error
-import http.cookiejar
-import socket
-import time
+import asyncio
+import aiohttp
 import re
 
 
 log = logger.get(__name__)
 
 
-def grab_url(url, max_retry=5, opener=None):
+@asyncio.coroutine
+def grab_url(url, max_retry=5):
     text = None
-    if opener is None:
-        cj = http.cookiejar.CookieJar()
-        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
     retry = False
     try:
-        text = opener.open(url, timeout=5).read()
-    except (socket.timeout, urllib.error.URLError):
+        # todo:
+        # TimeoutError: [Errno 60] Operation timed out
+        # Fatal read error on socket transport
+        response = yield from aiohttp.request('GET', url)
+        text = yield from response.read()
+        assert response.status == 200
+    except (AssertionError, aiohttp.ClientOSError, aiohttp.ClientResponseError):
+        yield from asyncio.sleep(6-max_retry)
         retry = True
-    except ConnectionResetError:
-        retry = False
-        log.error('oops, blocked! %s', url)
     if retry:
         if max_retry == 0:
-            raise Exception('Too many attempts to download %s' % url)
-        time.sleep(0.5)
-        return grab_url(url, max_retry - 1, opener)
+            raise RuntimeError('Too many attempts to download %s' % url)
+        return (yield from grab_url(url, max_retry - 1))
     log.debug('Retrieved %s', url)
     return text
 
@@ -37,9 +33,7 @@ def grab_url(url, max_retry=5, opener=None):
 class BaseParser(object):
     code = None
     name = None
-    domains = []
-    # These should be filled in by self._parse(html)
-    page_prefix = ''
+    domain = None
     feeder_pattern = ''
     feeder_pages = []  # index page for news
     date = None
@@ -51,14 +45,13 @@ class BaseParser(object):
     real_article = True  # If set to False, ignore this article
 
     def __init__(self, url):
-        try:
-            self.html = grab_url(url)
-        except urllib.request.HTTPError as e:
-            if e.code == 404:
-                self.real_article = False
-                return
-            raise
-        self._parse(self.html)
+        self.url = url
+
+    @asyncio.coroutine
+    def parse(self):
+        html = yield from grab_url(self.url)
+        self._parse(html)
+        return self
 
     def _parse(self, html):
         """Should take html and populate self.(date, title, byline, body)
@@ -74,18 +67,24 @@ class BaseParser(object):
         return BeautifulSoup(html, from_encoding=cls.encoding)
 
     @classmethod
+    @asyncio.coroutine
     def _get_all_page(cls, url):
         """Take the article list url and return a list of urls corresponding to all pages
         """
         raise NotImplementedError()
 
     @classmethod
+    @asyncio.coroutine
     def feed_urls(cls):
         all_urls = []
-        for feeder_url in cls.feeder_pages:
-            domain = '/'.join(feeder_url.split('/')[:3])
-            for page in cls._get_all_page(feeder_url):
-                urls = [a.get('href') or '' for a in cls.soup(grab_url(page)).findAll('a')]
-                urls = [url if '://' in url else concat(domain, url) for url in urls]
-                all_urls += [url for url in urls if re.search(cls.feeder_pattern, url)]
+        coroutines = [cls._get_all_page(feeder_url) for feeder_url in cls.feeder_pages]
+        for coroutine in asyncio.as_completed(coroutines):
+            for page in (yield from coroutine):
+                try:
+                    source = yield from grab_url(page)
+                    urls = [a.get('href') or '' for a in cls.soup(source).findAll('a')]
+                    urls = [url if '://' in url else "http://{}{}".format(cls.domain, url) for url in urls]
+                    all_urls += [url for url in urls if re.search(cls.feeder_pattern, url)]
+                except RuntimeError:
+                    log.info("Can't load page {}.  skipping...".format(page))
         return all_urls

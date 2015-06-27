@@ -1,13 +1,13 @@
-from parsers.baseparser import BaseParser
+from .baseparser import BaseParser
+import asyncio
 import re
 
 
 class TVBParser(BaseParser):
     code = 'tvb'
     name = u'無綫新聞'
-    domains = ['news.tvb.com']
-    page_prefix = 'http://news.tvb.com/'
-    feeder_pattern = '^http://news.tvb.com/'
+    domain = 'news.tvb.com'
+    feeder_pattern = '^http://news.tvb.com/[a-z]+/[0-9]+[0-9a-zA-Z]+/'
     feeder_pages = [
         'http://news.tvb.com/list/focus/',
         'http://news.tvb.com/list/instant/',
@@ -42,5 +42,6 @@ class TVBParser(BaseParser):
         self.body = '\n'.join(re.compile('\n+').split(div.getText().strip()))
 
     @classmethod
+    @asyncio.coroutine
     def _get_all_page(cls, url):
         return [url]
