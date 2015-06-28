@@ -24,11 +24,12 @@ class Articles(object):
             nid = news_cursor[0]['_id']
             revision_cursor = self.revisions.find({'nid': str(nid)})
             first_version = revision_cursor[0]
-            last_revision = revision_cursor[revision_cursor.count() - 1]
+            count = revision_cursor.count()
+            last_revision = revision_cursor[count - 1]
             if content.change_ratio(last_revision) > 0:
-                log.info('new entry version: %s', article.url)
-                self.update_news_entry(nid, content.title, content.change_ratio(first_version))
-                self.new_revision(nid, revision_cursor.count(), content)
+                log.info('entry version %s: %s', count, article.url)
+                self.update_news_entry(nid, content.title, content.change_ratio(first_version), count)
+                self.new_revision(nid, count, content)
             else:
                 log.debug('entry not modified: %s', article.url)
                 self.update_last_check_time(nid)
@@ -40,6 +41,7 @@ class Articles(object):
                       "publisher": publisher,
                       "comments_no": 0,
                       "changes": 0,
+                      "count": 1,
                       "lang": lang,
                       "created_at": now,
                       "updated_at": now,
@@ -58,10 +60,10 @@ class Articles(object):
                           }
         self.revisions.insert_one(revision_entry)
 
-    def update_news_entry(self, nid, title, changes):
+    def update_news_entry(self, nid, title, changes, count):
         now = datetime.utcnow()
         self.news.update_one({'_id': nid}, {'$set': {
-            'title': title, 'changes': changes, "updated_at": now, "last_check": now}})
+            'title': title, 'changes': changes, "updated_at": now, "last_check": now, "count": count + 1}})
 
     def update_last_check_time(self, nid):
         self.news.update_one({"_id": nid}, {'$set': {"last_check": datetime.utcnow()}})

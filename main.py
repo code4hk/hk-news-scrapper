@@ -1,14 +1,23 @@
 from util.env import log_dir
 from crawler import crawler
 from daemon import Daemon
+from util import logger
+import asyncio
 import sys
+
+
+log = logger.get(__name__)
 
 
 class CrawlerDaemon(Daemon):
     def run(self):
-
-        while True:
-            crawler.main()
+        loop = asyncio.get_event_loop()
+        try:
+            while True:
+                log.info("crawler.main")
+                crawler.main(loop)
+        finally:
+            loop.close()
 
 
 if __name__ == '__main__':

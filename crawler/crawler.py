@@ -34,13 +34,22 @@ def crawl_all():
                 articles.save_entry(page)
             except Exception as e:
                 log.error(e)
+    urls = get_existing_urls(articles)
+    to_get = [get_parser(x)(x).parse() for x in urls if x not in visited]
+    log.info("updating {} existing unvisited URLs".format(len(to_get)))
+    for get_page in asyncio.as_completed(to_get):
+        try:
+            page = yield from get_page
+            articles.save_entry(page)
+        except Exception as e:
+            log.error(e)
 
 
-def main():
-    loop = asyncio.get_event_loop()
+def main(loop):
     loop.run_until_complete(crawl_all())
-    loop.close()
 
 
 if __name__ == '__main__':
-    main()
+    loop = asyncio.get_event_loop()
+    main(loop)
+    loop.close()
